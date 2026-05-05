@@ -335,11 +335,19 @@ export default function SettingsPage({ token, onboarding }) {
               Are you sure you want to disconnect your Google account? Automatic email classification will stop and you will no longer receive new opportunities.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="mt-4 gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setShowDisconnectConfirm(false)} className="bg-[var(--surface-2)] text-[var(--text-primary)] border-[var(--border-color)] hover:bg-[var(--surface-3)]">
+          <DialogFooter className="mt-6 flex flex-row items-center justify-end gap-3 sm:space-x-0">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDisconnectConfirm(false)} 
+              className="flex-1 sm:flex-none bg-[var(--surface-2)] text-[var(--text-primary)] border-[var(--border-color)] hover:bg-[var(--surface-3)] h-11"
+            >
               Cancel
             </Button>
-            <Button onClick={handleDisconnect} disabled={disconnecting} className="bg-danger text-white hover:bg-danger/90 border-0">
+            <Button 
+              onClick={handleDisconnect} 
+              disabled={disconnecting} 
+              className="flex-1 sm:flex-none bg-red-600 text-white hover:bg-red-700 border-0 h-11 shadow-md font-bold"
+            >
               {disconnecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Disconnect
             </Button>
