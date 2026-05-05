@@ -56,6 +56,10 @@ export default {
           DEFAULT: 'hsl(var(--popover))',
           foreground: 'hsl(var(--popover-foreground))'
         },
+        success: '#22c55e',
+        warning: '#eab308',
+        danger: '#ef4444',
+        info: '#3b82f6',
       },
       keyframes: {
         'accordion-down': {
