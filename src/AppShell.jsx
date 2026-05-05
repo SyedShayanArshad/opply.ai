@@ -117,8 +117,9 @@ function AppContent() {
 
   useEffect(() => {
     if (!token) return;
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws?token=${token}`;
+    const apiUrl = import.meta.env.VITE_API_URL || "";
+    const wsBase = apiUrl.replace(/^http/, "ws");
+    const wsUrl = wsBase ? `${wsBase}/ws?token=${token}` : `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws?token=${token}`;
     let ws = new WebSocket(wsUrl);
     let rto = null;
     const connect = () => {
