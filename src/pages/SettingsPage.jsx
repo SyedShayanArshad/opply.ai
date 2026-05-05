@@ -156,7 +156,10 @@ export default function SettingsPage({ token, onboarding }) {
               <Button
                 type="button"
                 disabled={!hasProfile}
-                onClick={() => window.location.href = `http://localhost:8000/api/auth/google/login?token=${localStorage.getItem('token')}`}
+                onClick={() => {
+                  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+                  window.location.href = `${apiUrl}/api/auth/google/login?token=${localStorage.getItem('token')}`;
+                }}
                 className={`flex-1 h-11 rounded-xl font-medium ${hasOAuth ? 'bg-[var(--surface-2)] hover:bg-[var(--border-color)] text-[var(--text-primary)] border border-[var(--border-color)]' : 'btn-accent shadow-[0_0_15px_var(--accent-glow)]'}`}
               >
                 <Globe className="mr-2 h-4 w-4" />{hasOAuth ? 'Reconnect Google' : 'Connect Google'}
