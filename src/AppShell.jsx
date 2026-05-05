@@ -142,7 +142,11 @@ function AppContent() {
             setWorkerStatus(null);
           } else if (m.type === "setup_required" && activeView !== "profile")
             setWorkerStatus(m.message);
-          else if (m.type === "error") {
+          else if (m.type === "whatsapp_status") {
+            if (m.status === "success") toast.success(m.message);
+            else if (m.status === "warning") toast.warning(m.message);
+            else toast.error(m.message);
+          } else if (m.type === "error") {
             toast.error(m.message);
             setWorkerStatus("Sync failed");
           }

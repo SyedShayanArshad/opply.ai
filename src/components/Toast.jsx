@@ -6,11 +6,13 @@ const ToastContext = createContext(null)
 const iconMap = {
   success: CheckCircle2,
   error: AlertTriangle,
+  warning: AlertTriangle,
   info: Info,
 }
 const colorMap = {
   success: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400', icon: 'text-emerald-400' },
   error: { bg: 'bg-rose-500/10', border: 'border-rose-500/20', text: 'text-rose-300', icon: 'text-rose-400' },
+  warning: { bg: 'bg-amber-500/10', border: 'border-amber-500/20', text: 'text-amber-300', icon: 'text-amber-400' },
   info: { bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-300', icon: 'text-blue-400' },
 }
 
@@ -34,6 +36,7 @@ export function ToastProvider({ children }) {
   const api = {
     success: (msg) => addToast(msg, 'success'),
     error: (msg) => addToast(msg, 'error'),
+    warning: (msg) => addToast(msg, 'warning'),
     info: (msg) => addToast(msg, 'info'),
   }
 
