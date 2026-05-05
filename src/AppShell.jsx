@@ -117,7 +117,7 @@ function AppContent() {
 
   useEffect(() => {
     if (!token) return;
-    const apiUrl = import.meta.env.VITE_API_URL || "";
+    const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "https://opply-ai-backend.onrender.com" : "");
     const wsBase = apiUrl.replace(/^http/, "ws");
     const wsUrl = wsBase ? `${wsBase}/ws?token=${token}` : `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws?token=${token}`;
     let ws = new WebSocket(wsUrl);

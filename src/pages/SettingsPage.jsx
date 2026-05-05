@@ -157,7 +157,7 @@ export default function SettingsPage({ token, onboarding }) {
                 type="button"
                 disabled={!hasProfile}
                 onClick={() => {
-                  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+                  const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "https://opply-ai-backend.onrender.com" : "http://localhost:8000");
                   window.location.href = `${apiUrl}/api/auth/google/login?token=${localStorage.getItem('token')}`;
                 }}
                 className={`flex-1 h-11 rounded-xl font-medium ${hasOAuth ? 'bg-[var(--surface-2)] hover:bg-[var(--border-color)] text-[var(--text-primary)] border border-[var(--border-color)]' : 'btn-accent shadow-[0_0_15px_var(--accent-glow)]'}`}

@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://opply-ai-backend.onrender.com' : '');
 
 async function fetchWithAuth(url, options = {}, token) {
   const headers = {
