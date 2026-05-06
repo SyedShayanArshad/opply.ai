@@ -53,6 +53,7 @@ function AppContent() {
   const [workerStatus, setWorkerStatus] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [lastSynced, setLastSynced] = useState(null);
+  const [isValidatingToken, setIsValidatingToken] = useState(!!localStorage.getItem("token"));
   const toast = useToast();
   const [onboarding, setOnboarding] = useState(null);
   const [isDark, setIsDark] = useState(() => {
@@ -94,6 +95,8 @@ function AppContent() {
         setToken(null);
         localStorage.removeItem("token");
       }
+    } finally {
+      setIsValidatingToken(false);
     }
   }, [token]);
 
@@ -116,7 +119,10 @@ function AppContent() {
   }, [token, refreshOnboarding, refreshDashboard]);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      setIsValidatingToken(false);
+      return;
+    }
     const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "https://opply-ai-backend.onrender.com" : "");
     const wsBase = apiUrl.replace(/^http/, "ws");
     const wsUrl = wsBase ? `${wsBase}/ws?token=${token}` : `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws?token=${token}`;
@@ -140,6 +146,19 @@ function AppContent() {
           } else if (m.type === "sync_complete") {
             setLastSynced(new Date());
             setWorkerStatus(null);
+          } else if (m.type === "whatsapp_status") {
+            const shortSubject = (m.subject || "Email").slice(0, 40);
+            if (m.success) {
+              toast.success(`📱 WhatsApp alert sent for: "${shortSubject}"`);
+            } else if (m.error_reason === "daily_limit") {
+              toast.error(`⚠️ WhatsApp daily limit reached (5/day). Alert not sent for: "${shortSubject}"`);
+            } else if (m.error_reason === "not_joined") {
+              toast.error(`❌ WhatsApp not joined sandbox. Send 'join up-lonyer' to +14155238886 first.`);
+            } else if (m.error_reason === "credentials_missing") {
+              toast.error(`❌ WhatsApp not configured. Check Twilio credentials in settings.`);
+            } else {
+              toast.error(`❌ WhatsApp alert failed for: "${shortSubject}". Check logs.`);
+            }
           } else if (m.type === "setup_required" && activeView !== "profile")
             setWorkerStatus(m.message);
           else if (m.type === "error") {
@@ -272,12 +291,25 @@ function AppContent() {
     setSidebarOpen(false);
   };
 
+  if (isValidatingToken)
+    return (
+      <div className="min-h-screen bg-[var(--surface-0)] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-[var(--accent)]" />
+          <p className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)] animate-pulse">
+            Authenticating...
+          </p>
+        </div>
+      </div>
+    );
+
   if (!token)
     return (
       <AuthScreen
         onLogin={(t) => {
           setToken(t);
           localStorage.setItem("token", t);
+          setIsValidatingToken(false);
         }}
         isDark={isDark}
         setIsDark={setIsDark}

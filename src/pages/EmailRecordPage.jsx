@@ -9,14 +9,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 function timeAgo(isoString) {
   if (!isoString) return null
   try {
-    const diff = Date.now() - new Date(isoString).getTime()
+    // Ensure UTC interpretation — append Z if no timezone info present
+    const normalized = /[Z+\-]\d*$/.test(isoString.trim()) ? isoString : isoString + 'Z'
+    const date = new Date(normalized)
+    if (isNaN(date.getTime())) return null
+    const diff = Date.now() - date.getTime()
     const mins = Math.floor(diff / 60000)
-    if (mins < 1) return 'just now'
-    if (mins < 60) return `${mins}m ago`
+    if (mins < 1) return { relative: 'just now', absolute: date.toLocaleString() }
+    if (mins < 60) return { relative: `${mins}m ago`, absolute: date.toLocaleString() }
     const hours = Math.floor(mins / 60)
-    if (hours < 24) return `${hours}h ago`
-    const days = Math.floor(hours / 24)
-    return `${days}d ago`
+    if (hours < 24) return { relative: `${hours}h ago`, absolute: date.toLocaleString() }
+    // Older than 24h — show full date like "May 5, 2:30 PM"
+    const formatted = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) +
+      ', ' + date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+    return { relative: formatted, absolute: date.toLocaleString() }
   } catch { return null }
 }
 
@@ -40,7 +46,7 @@ function EmailRecordCard({ record, onDelete }) {
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <Badge variant="secondary" className="bg-[var(--surface-2)] text-[var(--text-muted)] border border-[var(--border-color)] hover:bg-[var(--surface-0)]">Filtered</Badge>
               {record.source && <Badge variant="outline" className="text-[9px] border-[var(--border-color)] text-[var(--text-muted)]">{record.source === 'gmail' ? <><Mail className="mr-1 h-2.5 w-2.5" />Gmail</> : <><Clipboard className="mr-1 h-2.5 w-2.5" />Manual</>}</Badge>}
-              {ago && <span className="text-[10px] text-[var(--text-secondary)] flex items-center gap-1 font-bold tracking-wider uppercase"><Clock className="h-2.5 w-2.5" />{ago}</span>}
+              {ago && <span title={ago.absolute} className="text-[10px] text-[var(--text-secondary)] flex items-center gap-1 font-bold tracking-wider uppercase cursor-default"><Clock className="h-2.5 w-2.5" />{ago.relative}</span>}
             </div>
             <h3 className="text-[15px] font-semibold text-[var(--text-primary)] truncate">{record.subject || 'Email'}</h3>
             <p className="mt-1 text-xs text-[var(--text-muted)] truncate flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--text-muted)] inline-block"></span>{record.sender || 'Unknown'}</p>
@@ -66,7 +72,7 @@ function EmailRecordCard({ record, onDelete }) {
             <Badge className="bg-[var(--accent)] text-[var(--accent-foreground)] hover:bg-[var(--accent)] hover:opacity-90 border-[var(--accent)]"><Zap className="mr-1 h-3 w-3" />Opportunity</Badge>
             {record.score != null && <Badge variant="outline" className={`border-[var(--border-color)] ${scoreColor(record.score)} font-bold`}>{Math.round(record.score)}% Match</Badge>}
             {record.source && <Badge variant="outline" className="text-[9px] border-[var(--border-color)] text-[var(--text-muted)]">{record.source === 'gmail' ? <><Mail className="mr-1 h-2.5 w-2.5" />Gmail</> : <><Clipboard className="mr-1 h-2.5 w-2.5" />Manual</>}</Badge>}
-            {ago && <span className="text-[10px] text-[var(--text-secondary)] flex items-center gap-1 font-bold tracking-wider uppercase"><Clock className="h-2.5 w-2.5" />{ago}</span>}
+            {ago && <span title={ago.absolute} className="text-[10px] text-[var(--text-secondary)] flex items-center gap-1 font-bold tracking-wider uppercase cursor-default"><Clock className="h-2.5 w-2.5" />{ago.relative}</span>}
           </div>
           <h3 className="mt-3 text-[17px] font-bold text-[var(--text-primary)] transition-colors">{record.subject || 'Email'}</h3>
           <p className="mt-1.5 text-sm text-[var(--text-secondary)] flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--text-muted)] inline-block"></span>{record.sender || 'Unknown'}</p>
