@@ -30,7 +30,7 @@ function scoreColor(s) {
 function EmailRecordCard({ record, onDelete }) {
   const [expanded, setExpanded] = useState(false)
   const isImportant = record.classification === 'important'
-  const ago = timeAgo(record.email_date || record.created_at)
+  const ago = timeAgo(record.created_at)
 
   if (!isImportant) {
     return (
