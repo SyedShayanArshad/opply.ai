@@ -94,12 +94,12 @@ function SetupStepper({ hasProfile, hasOAuth }) {
     { label: "Ready!", done: hasProfile && hasOAuth },
   ];
   return (
-    <div className="flex items-center gap-3 card-surface p-6 rounded-2xl">
+    <div className="flex flex-wrap items-center gap-4 sm:gap-6 card-surface p-4 sm:p-6 rounded-2xl">
       {steps.map((step, i) => (
         <React.Fragment key={step.label}>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-fit">
             <div
-              className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 ${
+              className={`flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
                 step.done
                   ? "bg-[var(--accent)] text-[var(--accent-foreground)] shadow-[0_0_20px_var(--accent-glow)] scale-110"
                   : "bg-[var(--surface-2)] text-[var(--text-muted)] border border-[var(--border-strong)]"
@@ -108,17 +108,17 @@ function SetupStepper({ hasProfile, hasOAuth }) {
               {step.done ? (
                 <CheckCircle2 className="h-5 w-5" />
               ) : (
-                <span className="text-sm font-bold">{i + 1}</span>
+                <span className="text-xs sm:text-sm font-bold">{i + 1}</span>
               )}
             </div>
-            <div>
+            <div className="flex flex-col">
               <span
-                className={`text-sm font-bold tracking-tight ${step.done ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}`}
+                className={`text-xs sm:text-sm font-bold tracking-tight whitespace-nowrap ${step.done ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}`}
               >
                 {step.label}
               </span>
               {step.optional && !step.done && (
-                <span className="ml-1.5 text-[9px] text-[var(--text-muted)] uppercase tracking-widest font-semibold">
+                <span className="text-[8px] sm:text-[9px] text-[var(--text-muted)] uppercase tracking-widest font-semibold">
                   (optional)
                 </span>
               )}
@@ -126,7 +126,7 @@ function SetupStepper({ hasProfile, hasOAuth }) {
           </div>
           {i < steps.length - 1 && (
             <div
-              className={`flex-1 h-px ${step.done ? "bg-[var(--accent)]/40" : "bg-[var(--border-color)]"} transition-colors duration-500`}
+              className={`hidden sm:block flex-1 h-px ${step.done ? "bg-[var(--accent)]/40" : "bg-[var(--border-color)]"} transition-colors duration-500 min-w-[20px]`}
             />
           )}
         </React.Fragment>
@@ -437,7 +437,7 @@ export default function ProfilePage({
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                   {OPPORTUNITY_TYPES.map((t) => (
                     <label
                       key={t}
@@ -449,7 +449,7 @@ export default function ProfilePage({
                       }`}
                     >
                       <div
-                        className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
+                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
                           preferredTypes.includes(t)
                             ? "bg-[var(--accent)] border-[var(--accent)]"
                             : "border-[var(--border-strong)] bg-transparent"
@@ -459,7 +459,7 @@ export default function ProfilePage({
                           <CheckCircle2 className="h-3 w-3 text-[var(--accent-foreground)]" />
                         )}
                       </div>
-                      <span className="text-sm font-medium">
+                      <span className="text-sm font-medium truncate">
                         <span className="mr-1.5 opacity-80">
                           {typeIcons[t]}
                         </span>

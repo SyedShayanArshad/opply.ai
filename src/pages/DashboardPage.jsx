@@ -46,19 +46,19 @@ function MetricCard({ config, value, index }) {
       className="relative overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--surface-1)] p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-fade-in"
       style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'backwards' }}
     >
-      <div className="flex items-center justify-between mb-4">
-        <div className="rounded-xl bg-[var(--surface-2)] p-2.5 border border-[var(--border-color)]">
-          <Icon className={`h-5 w-5 ${config.iconColor}`} />
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <div className="rounded-xl bg-[var(--surface-2)] p-2 sm:p-2.5 border border-[var(--border-color)] shrink-0">
+          <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${config.iconColor}`} />
         </div>
         {config.trend && (
-          <div className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${config.trendUp ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}`}>
+          <div className={`text-[9px] sm:text-[10px] font-bold px-2 sm:px-2.5 py-1 rounded-full whitespace-nowrap overflow-hidden text-ellipsis ${config.trendUp ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}`}>
             {config.trend}
           </div>
         )}
       </div>
-      <div>
-        <div className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">{value}</div>
-        <div className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mt-1.5">{config.label}</div>
+      <div className="min-w-0">
+        <div className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] truncate">{value}</div>
+        <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mt-1 sm:mt-1.5 truncate">{config.label}</div>
       </div>
     </div>
   )
@@ -88,9 +88,9 @@ function OpportunityRow({ item, index, onOpen }) {
               </Badge>
             )}
           </div>
-          <h3 className="text-base font-semibold text-[var(--text-primary)] truncate transition-colors">{title}</h3>
-          <p className="text-sm text-[var(--text-secondary)] truncate mt-1.5 flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--text-muted)] inline-block"></span>
+          <h3 className="text-sm sm:text-base font-semibold text-[var(--text-primary)] break-words transition-colors line-clamp-2">{title}</h3>
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words mt-1.5 flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--text-muted)] inline-block shrink-0"></span>
             {org}
           </p>
         </div>
@@ -327,7 +327,7 @@ export default function DashboardPage({ data, busy, emailsText, setEmailsText, o
       </div>
 
       {/* KPIs Row */}
-      <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
         {metricConfigs.map((c, i) => {
           let val = 0;
           if (c.isStatus) {

@@ -104,16 +104,16 @@ export default function OpportunityDrawer({ item, onClose }) {
       <div className="h-full w-full max-w-2xl overflow-y-auto border-l border-[var(--border-color)] bg-[var(--surface-0)] p-6 shadow-xl custom-scrollbar">
         {/* Header */}
         <div className="mb-8 flex items-start justify-between gap-4">
-          <div className="animate-fade-in">
+          <div className="animate-fade-in min-w-0 flex-1">
             <div className="mb-2">
               <Badge className="text-[10px] uppercase tracking-widest bg-[var(--surface-2)] text-[var(--text-primary)] border-[var(--border-color)]">
                 {item.extracted.opportunity_type || "opportunity"}
               </Badge>
             </div>
-            <h2 className="text-2xl font-bold text-[var(--text-primary)] leading-tight">
+            <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] leading-tight break-words">
               {title}
             </h2>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">{org}</p>
+            <p className="mt-1 text-sm text-[var(--text-secondary)] break-words">{org}</p>
           </div>
           <Button
             variant="ghost"
@@ -127,7 +127,7 @@ export default function OpportunityDrawer({ item, onClose }) {
 
         {/* Score Gauges */}
         <div
-          className="mb-8 flex items-center justify-around rounded-2xl bg-[var(--surface-1)] border border-[var(--border-color)] p-6 animate-fade-in delay-150"
+          className="mb-8 flex flex-wrap items-center justify-around gap-6 rounded-2xl bg-[var(--surface-1)] border border-[var(--border-color)] p-6 animate-fade-in delay-150"
           style={{ animationFillMode: "backwards" }}
         >
           <ScoreGauge label="Total" value={item.score.total} icon={Target} />
@@ -151,7 +151,7 @@ export default function OpportunityDrawer({ item, onClose }) {
                 Summary
               </div>
               <div
-                className="text-sm leading-relaxed text-[var(--text-secondary)]"
+                className="text-sm leading-relaxed text-[var(--text-secondary)] break-words"
                 dangerouslySetInnerHTML={{
                   __html: DOMPurify.sanitize(item.extracted.summary),
                 }}
@@ -198,33 +198,33 @@ export default function OpportunityDrawer({ item, onClose }) {
                   <Info className="h-3.5 w-3.5" />
                   Details
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   {item.extracted.deadline_text && (
                     <div className="rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-3">
                       <div className="text-[9px] uppercase tracking-[0.2em] text-[var(--text-muted)] mb-1 font-bold">
                         Deadline
                       </div>
-                      <div className="text-[var(--text-primary)] font-medium">
+                      <div className="text-[var(--text-primary)] font-medium break-words">
                         {item.extracted.deadline_text}
                       </div>
                     </div>
                   )}
                   {item.extracted.eligibility?.length > 0 && (
-                    <div className="rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-3 col-span-2">
+                    <div className="rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-3 sm:col-span-2">
                       <div className="text-[9px] uppercase tracking-[0.2em] text-[var(--text-muted)] mb-1 font-bold">
                         Eligibility
                       </div>
-                      <div className="text-[var(--text-secondary)]">
+                      <div className="text-[var(--text-secondary)] break-words">
                         {item.extracted.eligibility.join(", ")}
                       </div>
                     </div>
                   )}
                   {item.extracted.benefits?.length > 0 && (
-                    <div className="rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-3 col-span-2">
+                    <div className="rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-3 sm:col-span-2">
                       <div className="text-[9px] uppercase tracking-[0.2em] text-[var(--text-muted)] mb-1 font-bold">
                         Benefits
                       </div>
-                      <div className="text-[var(--text-secondary)]">
+                      <div className="text-[var(--text-secondary)] break-words">
                         {item.extracted.benefits.join(", ")}
                       </div>
                     </div>

@@ -142,11 +142,7 @@ function AppContent() {
             setWorkerStatus(null);
           } else if (m.type === "setup_required" && activeView !== "profile")
             setWorkerStatus(m.message);
-          else if (m.type === "whatsapp_status") {
-            if (m.status === "success") toast.success(m.message);
-            else if (m.status === "warning") toast.warning(m.message);
-            else toast.error(m.message);
-          } else if (m.type === "error") {
+          else if (m.type === "error") {
             toast.error(m.message);
             setWorkerStatus("Sync failed");
           }
@@ -303,7 +299,7 @@ function AppContent() {
 
       {/* ═══ Sidebar (simplified, no status footer) ═══ */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-screen w-[280px] bg-[var(--surface-1)]/95 backdrop-blur-xl border-r border-[var(--border-color)] flex flex-col transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed top-0 left-0 z-50 h-screen w-[280px] bg-[var(--surface-1)] lg:bg-[var(--surface-1)]/95 lg:backdrop-blur-xl border-r border-[var(--border-color)] flex flex-col transition-transform duration-300 lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } overflow-y-auto custom-scrollbar`}
       >
@@ -407,24 +403,24 @@ function AppContent() {
               <Menu className="h-5 w-5" />
             </button>
             {/* Worker status and sync details now live here */}
-            <div className="hidden sm:flex items-center gap-3 text-sm flex-wrap">
+            <div className="flex items-center gap-2 sm:gap-3 text-sm flex-wrap">
               {workerStatus ? (
-                <div className="flex items-center gap-2 rounded-full bg-[var(--surface-2)] border border-[var(--border-color)] px-3 py-1 text-xs font-medium text-[var(--text-primary)]">
-                  <Loader2 className="h-3 w-3 animate-spin text-[var(--accent)]" />
+                <div className="flex items-center gap-2 rounded-full bg-[var(--surface-2)] border border-[var(--border-color)] px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-medium text-[var(--text-primary)] max-w-[120px] sm:max-w-none">
+                  <Loader2 className="h-3 w-3 animate-spin text-[var(--accent)] shrink-0" />
                   <span className="truncate">{workerStatus}</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 rounded-full bg-[var(--surface-2)] border border-[var(--border-color)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)]">
-                  <span className="relative flex h-2 w-2">
+                <div className="flex items-center gap-2 rounded-full bg-[var(--surface-2)] border border-[var(--border-color)] px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-medium text-[var(--text-secondary)]">
+                  <span className="relative flex h-2 w-2 shrink-0">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent)]"></span>
                   </span>
-                  <span>Worker Idle</span>
+                  <span className="hidden xs:inline">Worker Idle</span>
                 </div>
               )}
               {lastSynced && (
-                <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-                  <RefreshCw className="h-3 w-3" />
+                <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-[var(--text-muted)]">
+                  <RefreshCw className="h-3 w-3 shrink-0" />
                   <span className="hidden md:inline">
                     Last sync: {lastSynced.toLocaleTimeString()}
                   </span>
