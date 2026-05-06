@@ -44,8 +44,12 @@ function EmailRecordCard({ record, onDelete }) {
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <Badge variant="secondary" className="bg-[var(--surface-2)] text-[var(--text-muted)] border border-[var(--border-color)] hover:bg-[var(--surface-0)]">Filtered</Badge>
-              {record.source && <Badge variant="outline" className="text-[9px] border-[var(--border-color)] text-[var(--text-muted)]">{record.source === 'gmail' ? <><Mail className="mr-1 h-2.5 w-2.5" />Gmail</> : <><Clipboard className="mr-1 h-2.5 w-2.5" />Manual</>}</Badge>}
+              <Badge variant="secondary" className="bg-[var(--surface-2)] text-[var(--text-muted)] border border-[var(--border-color)] p-1"><Filter className="h-3 w-3" /></Badge>
+              {record.source && (
+                <Badge variant="outline" className="p-1 border-[var(--border-color)] text-[var(--text-muted)]" title={record.source === 'gmail' ? 'Gmail' : 'Manual'}>
+                  {record.source === 'gmail' ? <Mail className="h-3 w-3" /> : <Clipboard className="h-3 w-3" />}
+                </Badge>
+              )}
               {ago && <span title={ago.absolute} className="text-[10px] text-[var(--text-secondary)] flex items-center gap-1 font-bold tracking-wider uppercase cursor-default"><Clock className="h-2.5 w-2.5" />{ago.relative}</span>}
             </div>
             <h3 className="text-[15px] font-semibold text-[var(--text-primary)] truncate">{record.subject || 'Email'}</h3>
@@ -69,9 +73,13 @@ function EmailRecordCard({ record, onDelete }) {
       <div className="relative flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge className="bg-[var(--accent)] text-[var(--accent-foreground)] hover:bg-[var(--accent)] hover:opacity-90 border-[var(--accent)]"><Zap className="mr-1 h-3 w-3" />Opportunity</Badge>
-            {record.score != null && <Badge variant="outline" className={`border-[var(--border-color)] ${scoreColor(record.score)} font-bold`}>{Math.round(record.score)}% Match</Badge>}
-            {record.source && <Badge variant="outline" className="text-[9px] border-[var(--border-color)] text-[var(--text-muted)]">{record.source === 'gmail' ? <><Mail className="mr-1 h-2.5 w-2.5" />Gmail</> : <><Clipboard className="mr-1 h-2.5 w-2.5" />Manual</>}</Badge>}
+            <Badge className="bg-[var(--accent)] text-[var(--accent-foreground)] hover:bg-[var(--accent)] border-[var(--accent)] p-1" title="Opportunity"><Zap className="h-3.5 w-3.5" /></Badge>
+            {record.score != null && <Badge variant="outline" className={`border-[var(--border-color)] ${scoreColor(record.score)} font-bold`}>{Math.round(record.score)}%</Badge>}
+            {record.source && (
+              <Badge variant="outline" className="p-1 border-[var(--border-color)] text-[var(--text-muted)]" title={record.source === 'gmail' ? 'Gmail' : 'Manual'}>
+                {record.source === 'gmail' ? <Mail className="h-3 w-3" /> : <Clipboard className="h-3 w-3" />}
+              </Badge>
+            )}
             {ago && <span title={ago.absolute} className="text-[10px] text-[var(--text-secondary)] flex items-center gap-1 font-bold tracking-wider uppercase cursor-default"><Clock className="h-2.5 w-2.5" />{ago.relative}</span>}
           </div>
           <h3 className="mt-3 text-[17px] font-bold text-[var(--text-primary)] transition-colors">{record.subject || 'Email'}</h3>
@@ -140,8 +148,19 @@ export default function EmailRecordPage({ data, onDeleteEmail, onDeleteAllEmails
     return records.filter(r => (r.subject || '').toLowerCase().includes(q) || (r.sender || '').toLowerCase().includes(q) || (r.explanation || '').toLowerCase().includes(q))
   }, [records, search])
 
-  const imp = filtered.filter(r => r.classification === 'important')
-  const unimp = filtered.filter(r => r.classification === 'not important')
+  const imp = useMemo(() => 
+    filtered.filter(r => r.classification === 'important')
+           .sort((a, b) => (b.score || 0) - (a.score || 0)),
+  [filtered])
+
+  const unimp = useMemo(() => 
+    filtered.filter(r => r.classification === 'not important')
+           .sort((a, b) => {
+             const dateA = new Date(a.created_at || 0)
+             const dateB = new Date(b.created_at || 0)
+             return dateB - dateA
+           }),
+  [filtered])
 
   return (
     <div className="space-y-8 animate-fade-in pb-12 email-archive-container">

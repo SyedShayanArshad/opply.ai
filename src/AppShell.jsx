@@ -149,15 +149,15 @@ function AppContent() {
           } else if (m.type === "whatsapp_status") {
             const shortSubject = (m.subject || "Email").slice(0, 40);
             if (m.success) {
-              toast.success(`📱 WhatsApp alert sent for: "${shortSubject}"`);
+              toast.success(`WhatsApp alert sent for: "${shortSubject}"`);
             } else if (m.error_reason === "daily_limit") {
-              toast.error(`⚠️ WhatsApp daily limit reached (5/day). Alert not sent for: "${shortSubject}"`);
+              toast.error(`WhatsApp daily limit reached (5/day). Alert not sent for: "${shortSubject}"`);
             } else if (m.error_reason === "not_joined") {
-              toast.error(`❌ WhatsApp not joined sandbox. Send 'join up-lonyer' to +14155238886 first.`);
+              toast.error(`WhatsApp not joined sandbox. Send 'join up-lonyer' to +14155238886 first.`);
             } else if (m.error_reason === "credentials_missing") {
-              toast.error(`❌ WhatsApp not configured. Check Twilio credentials in settings.`);
+              toast.error(`WhatsApp not configured. Check Twilio credentials in settings.`);
             } else {
-              toast.error(`❌ WhatsApp alert failed for: "${shortSubject}". Check logs.`);
+              toast.error(`WhatsApp alert failed for: "${shortSubject}". Check logs.`);
             }
           } else if (m.type === "setup_required" && activeView !== "profile")
             setWorkerStatus(m.message);
