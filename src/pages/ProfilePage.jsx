@@ -146,6 +146,7 @@ export default function ProfilePage({
   const [profileBusy, setProfileBusy] = useState(false);
   const [profileSummary, setProfileSummary] = useState("");
   const [isUploadingResume, setIsUploadingResume] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState("");
   const [resumeFeedback, setResumeFeedback] = useState({ type: "", message: "" });
   const [isDragOver, setIsDragOver] = useState(false);
   const summaryRef = useRef(null);
@@ -257,6 +258,7 @@ export default function ProfilePage({
     
     setIsUploadingResume(true);
     setResumeFeedback({ type: "info", message: "Extracting and parsing resume using AI..." });
+    setUploadedFileName("");
     
     try {
       const data = await uploadResume(token, file);
@@ -284,6 +286,7 @@ export default function ProfilePage({
         form.setValue(key, val, { shouldValidate: true, shouldDirty: true });
       });
       
+      setUploadedFileName(file.name);
       setResumeFeedback({ type: "success", message: "Resume parsed successfully! Please review the auto-filled fields below and save." });
     } catch (err) {
       setResumeFeedback({ type: "error", message: err.message || "Failed to parse resume." });
@@ -398,6 +401,18 @@ export default function ProfilePage({
                         <Loader2 className="h-8 w-8 text-[var(--accent)] animate-spin" />
                       </div>
                       <p className="text-sm font-medium text-[var(--text-primary)]">Analyzing Document...</p>
+                    </div>
+                  ) : uploadedFileName ? (
+                    <div className="flex flex-col items-center gap-3 text-center">
+                      <div className="p-4 rounded-full bg-success/10 transition-colors">
+                        <FileText className="h-8 w-8 text-success" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-[var(--text-primary)] flex items-center justify-center gap-2">
+                          {uploadedFileName} <CheckCircle2 className="h-4 w-4 text-success" />
+                        </p>
+                        <p className="text-xs text-[var(--text-muted)] mt-1">Click or drag to replace file</p>
+                      </div>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-3 text-center">
