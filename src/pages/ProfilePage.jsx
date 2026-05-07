@@ -377,7 +377,7 @@ export default function ProfilePage({
               </CardHeader>
               <CardContent>
                 <div 
-                  className={`relative flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl transition-all duration-300 ${
+                  className={`relative flex flex-col sm:flex-row items-center gap-4 p-5 border-2 border-dashed rounded-xl transition-all duration-300 ${
                     isDragOver 
                       ? "border-[var(--accent)] bg-[var(--accent-glow)] scale-[1.01]" 
                       : "border-[var(--border-strong)] bg-[var(--surface-2)] hover:bg-[var(--surface-1)] hover:border-[var(--accent)]/50"
@@ -396,36 +396,44 @@ export default function ProfilePage({
                   />
                   
                   {isUploadingResume ? (
-                    <div className="flex flex-col items-center gap-3 animate-pulse">
-                      <div className="p-3 rounded-full bg-[var(--accent-glow)]">
-                        <Loader2 className="h-8 w-8 text-[var(--accent)] animate-spin" />
+                    <>
+                      <div className="p-3 rounded-full bg-[var(--accent-glow)] shrink-0">
+                        <Loader2 className="h-6 w-6 text-[var(--accent)] animate-spin" />
                       </div>
-                      <p className="text-sm font-medium text-[var(--text-primary)]">Analyzing Document...</p>
-                    </div>
+                      <div className="animate-pulse text-center sm:text-left">
+                        <p className="text-sm font-semibold text-[var(--text-primary)]">Analyzing Document...</p>
+                        <p className="text-xs text-[var(--text-muted)] mt-0.5">Please wait while AI extracts your information</p>
+                      </div>
+                    </>
                   ) : uploadedFileName ? (
-                    <div className="flex flex-col items-center gap-3 text-center">
-                      <div className="p-4 rounded-full bg-success/10 transition-colors">
-                        <FileText className="h-8 w-8 text-success" />
+                    <>
+                      <div className="p-3 rounded-full bg-success/10 transition-colors shrink-0">
+                        <FileText className="h-6 w-6 text-success" />
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-[var(--text-primary)] flex items-center justify-center gap-2">
+                      <div className="text-center sm:text-left">
+                        <p className="text-sm font-semibold text-[var(--text-primary)] flex items-center justify-center sm:justify-start gap-2">
                           {uploadedFileName} <CheckCircle2 className="h-4 w-4 text-success" />
                         </p>
-                        <p className="text-xs text-[var(--text-muted)] mt-1">Click or drag to replace file</p>
+                        <p className="text-xs text-[var(--text-muted)] mt-0.5">Click or drag here to replace file</p>
                       </div>
-                    </div>
+                    </>
                   ) : (
-                    <div className="flex flex-col items-center gap-3 text-center">
-                      <div className={`p-4 rounded-full transition-colors ${isDragOver ? 'bg-[var(--accent)]' : 'bg-[var(--surface-0)]'}`}>
-                        <UploadCloud className={`h-8 w-8 ${isDragOver ? 'text-white' : 'text-[var(--text-muted)]'}`} />
+                    <>
+                      <div className={`p-3 rounded-full transition-colors shrink-0 ${isDragOver ? 'bg-[var(--accent)]' : 'bg-[var(--surface-0)]'}`}>
+                        <UploadCloud className={`h-6 w-6 ${isDragOver ? 'text-white' : 'text-[var(--text-muted)]'}`} />
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-[var(--text-primary)]">
-                          Click to upload or drag and drop
+                      <div className="text-center sm:text-left">
+                        <p className="text-sm font-semibold text-[var(--text-primary)]">
+                          Upload your resume to auto-fill profile
                         </p>
-                        <p className="text-xs text-[var(--text-muted)] mt-1">PDF or DOCX (Max 5MB)</p>
+                        <p className="text-xs text-[var(--text-muted)] mt-0.5">Supports PDF or DOCX format (Max 5MB)</p>
                       </div>
-                    </div>
+                      <div className="sm:ml-auto pointer-events-none mt-2 sm:mt-0">
+                        <Button type="button" variant="secondary" size="sm" className="h-8 text-xs pointer-events-none">
+                          Browse File
+                        </Button>
+                      </div>
+                    </>
                   )}
                 </div>
                 
