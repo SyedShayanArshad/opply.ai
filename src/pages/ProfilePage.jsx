@@ -15,6 +15,8 @@ import {
   DollarSign,
   Target,
   PartyPopper,
+  UploadCloud,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,7 +37,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { getProfile, updateProfile } from "@/api";
+import { getProfile, updateProfile, uploadResume } from "@/api";
 
 const ProfileSchema = z.object({
   degree_program: z.string().min(2, "Degree/program is required"),
@@ -143,6 +145,9 @@ export default function ProfilePage({
 }) {
   const [profileBusy, setProfileBusy] = useState(false);
   const [profileSummary, setProfileSummary] = useState("");
+  const [isUploadingResume, setIsUploadingResume] = useState(false);
+  const [resumeFeedback, setResumeFeedback] = useState({ type: "", message: "" });
+  const [isDragOver, setIsDragOver] = useState(false);
   const summaryRef = useRef(null);
 
   const form = useForm({
@@ -242,6 +247,58 @@ export default function ProfilePage({
       shouldValidate: true,
     });
   };
+
+  const handleFileUpload = async (file) => {
+    if (!file) return;
+    if (file.type !== "application/pdf" && !file.name.endsWith(".docx")) {
+      setResumeFeedback({ type: "error", message: "Only PDF or DOCX files are supported." });
+      return;
+    }
+    
+    setIsUploadingResume(true);
+    setResumeFeedback({ type: "info", message: "Extracting and parsing resume using AI..." });
+    
+    try {
+      const data = await uploadResume(token, file);
+      
+      // Update form fields with extracted data
+      const updates = {};
+      if (data.degree_program) updates.degree_program = data.degree_program;
+      if (data.semester) updates.semester = data.semester;
+      if (data.cgpa) updates.cgpa = data.cgpa;
+      if (data.skills && data.skills.length > 0) {
+        const currentSkills = form.getValues("skills_csv");
+        updates.skills_csv = currentSkills ? `${currentSkills}, ${data.skills.join(", ")}` : data.skills.join(", ");
+      }
+      if (data.interests && data.interests.length > 0) {
+        const currentInterests = form.getValues("interests_csv");
+        updates.interests_csv = currentInterests ? `${currentInterests}, ${data.interests.join(", ")}` : data.interests.join(", ");
+      }
+      if (data.past_experience) {
+        const currentExp = form.getValues("past_experience");
+        updates.past_experience = currentExp ? `${currentExp}\n\n${data.past_experience}` : data.past_experience;
+      }
+      
+      // Apply updates
+      Object.entries(updates).forEach(([key, val]) => {
+        form.setValue(key, val, { shouldValidate: true, shouldDirty: true });
+      });
+      
+      setResumeFeedback({ type: "success", message: "Resume parsed successfully! Please review the auto-filled fields below and save." });
+    } catch (err) {
+      setResumeFeedback({ type: "error", message: err.message || "Failed to parse resume." });
+    } finally {
+      setIsUploadingResume(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    handleFileUpload(file);
+  };
+
   const hasProfile = onboarding?.has_profile;
   const hasOAuth = onboarding?.has_oauth;
 
@@ -303,6 +360,80 @@ export default function ProfilePage({
                 {errors.root.message}
               </div>
             )}
+
+            {/* Resume Drag & Drop Card */}
+            <Card className="card-surface border-0 overflow-hidden rounded-2xl">
+              <div className="h-1 w-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-glow)]" />
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-lg text-[var(--text-primary)]">
+                  <FileText className="h-5 w-5 text-[var(--accent)]" /> Quick Auto-Fill
+                </CardTitle>
+                <CardDescription className="text-[var(--text-secondary)]">
+                  Drag and drop your resume (PDF/DOCX) to let AI instantly populate your profile fields.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div 
+                  className={`relative flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl transition-all duration-300 ${
+                    isDragOver 
+                      ? "border-[var(--accent)] bg-[var(--accent-glow)] scale-[1.01]" 
+                      : "border-[var(--border-strong)] bg-[var(--surface-2)] hover:bg-[var(--surface-1)] hover:border-[var(--accent)]/50"
+                  }`}
+                  onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                  onDragLeave={() => setIsDragOver(false)}
+                  onDrop={handleDrop}
+                >
+                  <input 
+                    type="file" 
+                    id="resume-upload" 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    accept=".pdf,.docx"
+                    onChange={(e) => handleFileUpload(e.target.files?.[0])}
+                    disabled={isUploadingResume}
+                  />
+                  
+                  {isUploadingResume ? (
+                    <div className="flex flex-col items-center gap-3 animate-pulse">
+                      <div className="p-3 rounded-full bg-[var(--accent-glow)]">
+                        <Loader2 className="h-8 w-8 text-[var(--accent)] animate-spin" />
+                      </div>
+                      <p className="text-sm font-medium text-[var(--text-primary)]">Analyzing Document...</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-3 text-center">
+                      <div className={`p-4 rounded-full transition-colors ${isDragOver ? 'bg-[var(--accent)]' : 'bg-[var(--surface-0)]'}`}>
+                        <UploadCloud className={`h-8 w-8 ${isDragOver ? 'text-white' : 'text-[var(--text-muted)]'}`} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-[var(--text-primary)]">
+                          Click to upload or drag and drop
+                        </p>
+                        <p className="text-xs text-[var(--text-muted)] mt-1">PDF or DOCX (Max 5MB)</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {resumeFeedback.message && (
+                  <div className={`mt-4 p-3 rounded-lg flex items-start gap-2 text-sm border ${
+                    resumeFeedback.type === 'error' 
+                      ? 'bg-danger/10 text-danger border-danger/20' 
+                      : resumeFeedback.type === 'success'
+                        ? 'bg-success/10 text-success border-success/20'
+                        : 'bg-[var(--accent-glow)] text-[var(--text-primary)] border-[var(--accent)]/20'
+                  }`}>
+                    {resumeFeedback.type === 'success' ? (
+                      <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
+                    ) : resumeFeedback.type === 'error' ? (
+                      <span className="text-lg leading-none shrink-0">⚠️</span>
+                    ) : (
+                      <Sparkles className="h-4 w-4 shrink-0 mt-0.5 text-[var(--accent)]" />
+                    )}
+                    <span className="leading-tight">{resumeFeedback.message}</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Academic Card */}
             <Card className="card-surface border-0 overflow-hidden rounded-2xl">

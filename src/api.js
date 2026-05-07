@@ -65,6 +65,33 @@ export async function updateProfile(token, profile) {
   }, token)
 }
 
+export async function uploadResume(token, file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  
+  const headers = {
+    'Authorization': `Bearer ${token}`
+  }
+
+  const res = await fetch(API_BASE + '/api/protected/resume/upload', {
+    method: 'POST',
+    headers,
+    body: formData
+  })
+  
+  if (!res.ok) {
+    let detail = ''
+    try {
+      const j = await res.json()
+      detail = j?.detail || j?.error || JSON.stringify(j)
+    } catch {
+      detail = await res.text()
+    }
+    throw new Error(detail || `Error ${res.status}`)
+  }
+  return await res.json()
+}
+
 // ─── Account & OAuth ───────────────────────────────────────────────
 
 export async function disconnectGoogleOAuth(token) {
