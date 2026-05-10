@@ -1,6 +1,6 @@
 /**
  * Calendar Integration Utility
- * Generates calendar event links (Google, Outlook) and .ics downloads
+ * Generates calendar event links for Google Calendar
  * from opportunity deadline data.
  */
 
@@ -33,16 +33,6 @@ function toGoogleDateStr(date) {
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}${m}${d}`;
-}
-
-/**
- * Format a Date into ISO string for Outlook (YYYY-MM-DD).
- */
-function toOutlookDateStr(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
 }
 
 /**
@@ -140,82 +130,4 @@ export function getGoogleCalendarUrl(opportunity) {
   });
 
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
-}
-
-/**
- * Generate an Outlook Calendar event URL.
- * Returns empty string if deadline cannot be parsed.
- */
-export function getOutlookCalendarUrl(opportunity) {
-  if (!opportunity) return "";
-  const data = extractEventData(opportunity);
-  const date = parseDeadline(data.deadlineIso, data.deadlineText);
-  if (!date) return "";
-
-  const dateStr = toOutlookDateStr(date);
-
-  const params = new URLSearchParams({
-    path: "/calendar/action/compose",
-    rru: "addevent",
-    startdt: dateStr,
-    enddt: dateStr,
-    subject: `📌 ${data.title}`,
-    body: buildDescription(data),
-    location: data.location,
-    allday: "true",
-  });
-
-  return `https://outlook.live.com/calendar/0/action/compose?${params.toString()}`;
-}
-
-/**
- * Generate and trigger download of an .ics file.
- * This works with Apple Calendar, Google Calendar desktop, Outlook desktop, etc.
- */
-export function downloadIcsFile(opportunity) {
-  if (!opportunity) return;
-  const data = extractEventData(opportunity);
-  const date = parseDeadline(data.deadlineIso, data.deadlineText);
-  if (!date) return;
-
-  const dateStr = toGoogleDateStr(date);
-
-  const nextDay = new Date(date);
-  nextDay.setDate(nextDay.getDate() + 1);
-  const endDateStr = toGoogleDateStr(nextDay);
-
-  // Escape special chars for ICS format
-  const esc = (str) =>
-    (str || "")
-      .replace(/\\/g, "\\\\")
-      .replace(/;/g, "\\;")
-      .replace(/,/g, "\\,")
-      .replace(/\n/g, "\\n");
-
-  const ics = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//Opply AI//Calendar//EN",
-    "CALSCALE:GREGORIAN",
-    "METHOD:PUBLISH",
-    "BEGIN:VEVENT",
-    `DTSTART;VALUE=DATE:${dateStr}`,
-    `DTEND;VALUE=DATE:${endDateStr}`,
-    `SUMMARY:📌 ${esc(data.title)}`,
-    `DESCRIPTION:${esc(buildDescription(data))}`,
-    `LOCATION:${esc(data.location)}`,
-    `STATUS:CONFIRMED`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
-
-  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${data.title.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 40)}_deadline.ics`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
 }
