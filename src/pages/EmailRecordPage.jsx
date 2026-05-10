@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { FileText, Info, ListChecks, Search, Zap, ExternalLink, Filter, Trash2, AlertTriangle, Mail, Clipboard, Clock, Sparkles, MapPin, Calendar, Target, BadgeCheck } from 'lucide-react'
+import { FileText, Info, ListChecks, Search, Zap, ExternalLink, Filter, Trash2, AlertTriangle, Mail, Clipboard, Clock, Sparkles, MapPin, Calendar, Target, BadgeCheck, ChevronDown, ChevronUp } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -57,6 +57,7 @@ function MiniScoreBar({ label, value, icon: Icon }) {
 }
 
 function EmailRecordCard({ record, onDelete }) {
+  const [expanded, setExpanded] = useState(false)
   const isImportant = record.classification === 'important'
   const ago = timeAgo(record.created_at)
 
@@ -99,7 +100,7 @@ function EmailRecordCard({ record, onDelete }) {
       <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-[var(--accent-glow)] opacity-0 blur-3xl group-hover:opacity-20 transition-all duration-500" />
 
       {/* ─── Header ─────────────────────────────────────── */}
-      <div className="relative flex items-start justify-between gap-4 mb-5">
+      <div className="relative flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <Badge className="bg-[var(--accent)] text-[var(--accent-foreground)] hover:bg-[var(--accent)] border-[var(--accent)] p-1" title="Opportunity"><Zap className="h-3.5 w-3.5" /></Badge>
@@ -128,12 +129,23 @@ function EmailRecordCard({ record, onDelete }) {
             {record.organization || record.sender || 'Unknown'}
           </p>
         </div>
-        {onDelete && (
-          <button onClick={() => onDelete(record.email_id)} className="relative rounded-lg p-2 bg-[var(--surface-1)] border border-transparent text-[var(--text-muted)] hover:text-danger hover:border-danger/30 hover:bg-danger-light transition-colors" title="Delete">
-            <Trash2 className="h-4 w-4" />
+        <div className="flex items-center gap-1.5">
+          {onDelete && (
+            <button onClick={(e) => { e.stopPropagation(); onDelete(record.email_id); }} className="relative rounded-lg p-2 bg-[var(--surface-1)] border border-transparent text-[var(--text-muted)] hover:text-danger hover:border-danger/30 hover:bg-danger-light transition-colors" title="Delete">
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+          <button 
+            onClick={() => setExpanded(!expanded)} 
+            className={`relative rounded-lg p-2 border transition-all ${expanded ? 'bg-[var(--surface-2)] text-[var(--text-primary)] border-[var(--border-color)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]'}`}
+          >
+            {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </button>
-        )}
+        </div>
       </div>
+
+      {expanded && (
+        <div className="mt-6 space-y-5 animate-in slide-in-from-top-2 duration-300">
 
       {/* ─── Score Breakdown ──────────────────────────────── */}
       {record.score_breakdown && (
@@ -242,6 +254,8 @@ function EmailRecordCard({ record, onDelete }) {
               </li>
             ))}
           </ul>
+        </div>
+      )}
         </div>
       )}
     </div>
