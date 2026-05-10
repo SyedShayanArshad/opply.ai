@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { FileText, Info, ListChecks, Search, Zap, ExternalLink, Filter, ChevronDown, ChevronUp, Trash2, AlertTriangle, Mail, Clipboard, Clock } from 'lucide-react'
+import { FileText, Info, ListChecks, Search, Zap, ExternalLink, Filter, Trash2, AlertTriangle, Mail, Clipboard, Clock, Sparkles, MapPin, Calendar, Target, BadgeCheck } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -33,8 +33,30 @@ function scoreColor(s) {
   return 'text-[var(--text-muted)]'
 }
 
+function scoreBarClass(s) {
+  if (s >= 85) return 'bg-success'
+  if (s >= 70) return 'bg-info'
+  if (s >= 55) return 'bg-warning'
+  return 'bg-[var(--border-strong)]'
+}
+
+function MiniScoreBar({ label, value, icon: Icon }) {
+  return (
+    <div className="flex-1 min-w-0">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] flex items-center gap-1">
+          {Icon && <Icon className="h-2.5 w-2.5" />}{label}
+        </span>
+        <span className={`text-[10px] font-bold ${scoreColor(value)}`}>{Math.round(value)}%</span>
+      </div>
+      <div className="h-1 rounded-full bg-[var(--surface-0)] overflow-hidden">
+        <div className={`h-full rounded-full transition-all duration-500 ${scoreBarClass(value)}`} style={{ width: `${value}%` }} />
+      </div>
+    </div>
+  )
+}
+
 function EmailRecordCard({ record, onDelete }) {
-  const [expanded, setExpanded] = useState(false)
   const isImportant = record.classification === 'important'
   const ago = timeAgo(record.created_at)
 
@@ -65,16 +87,32 @@ function EmailRecordCard({ record, onDelete }) {
     )
   }
 
+  // ── Important Opportunity Card (always fully expanded) ──
+  const sb = record.score_breakdown || {}
+  const fitVal = sb.fit ?? 0
+  const urgencyVal = sb.urgency ?? 0
+  const completenessVal = sb.completeness ?? 0
+
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--surface-1)] p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-lg">
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[var(--surface-2)] to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] opacity-50" />
       <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-[var(--accent-glow)] opacity-0 blur-3xl group-hover:opacity-20 transition-all duration-500" />
-      
-      <div className="relative flex items-start justify-between gap-4">
+
+      {/* ─── Header ─────────────────────────────────────── */}
+      <div className="relative flex items-start justify-between gap-4 mb-5">
         <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
             <Badge className="bg-[var(--accent)] text-[var(--accent-foreground)] hover:bg-[var(--accent)] border-[var(--accent)] p-1" title="Opportunity"><Zap className="h-3.5 w-3.5" /></Badge>
-            {record.score != null && <Badge variant="outline" className={`border-[var(--border-color)] ${scoreColor(record.score)} font-bold`}>{Math.round(record.score)}%</Badge>}
+            {record.opportunity_type && (
+              <Badge variant="outline" className="text-[10px] uppercase tracking-widest border-[var(--border-color)] text-[var(--text-muted)] bg-[var(--surface-2)] font-bold">
+                {record.opportunity_type}
+              </Badge>
+            )}
+            {record.score != null && (
+              <Badge variant="outline" className={`border-[var(--border-color)] ${scoreColor(record.score)} font-bold text-[11px]`}>
+                {Math.round(record.score)}% match
+              </Badge>
+            )}
             {record.source && (
               <Badge variant="outline" className="p-1 border-[var(--border-color)] text-[var(--text-muted)]" title={record.source === 'gmail' ? 'Gmail' : 'Manual'}>
                 {record.source === 'gmail' ? <Mail className="h-3 w-3" /> : <Clipboard className="h-3 w-3" />}
@@ -82,60 +120,134 @@ function EmailRecordCard({ record, onDelete }) {
             )}
             {ago && <span title={ago.absolute} className="text-[10px] text-[var(--text-secondary)] flex items-center gap-1 font-bold tracking-wider uppercase cursor-default"><Clock className="h-2.5 w-2.5" />{ago.relative}</span>}
           </div>
-          <h3 className="mt-3 text-[17px] font-bold text-[var(--text-primary)] transition-colors">{record.subject || 'Email'}</h3>
-          <p className="mt-1.5 text-sm text-[var(--text-secondary)] flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--text-muted)] inline-block"></span>{record.sender || 'Unknown'}</p>
+          <h3 className="text-[17px] font-bold text-[var(--text-primary)]">
+            {record.opportunity_title || record.subject || 'Email'}
+          </h3>
+          <p className="mt-1.5 text-sm text-[var(--text-secondary)] flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--text-muted)] inline-block" />
+            {record.organization || record.sender || 'Unknown'}
+          </p>
         </div>
-        <div className="flex items-center gap-1.5">
-          {onDelete && <button onClick={() => onDelete(record.email_id)} className="rounded-lg p-2 bg-[var(--surface-1)] border border-transparent text-[var(--text-muted)] hover:text-danger hover:border-danger/30 hover:bg-danger-light transition-colors" title="Delete"><Trash2 className="h-4 w-4" /></button>}
-          <button onClick={() => setExpanded(!expanded)} className={`rounded-lg p-2 border transition-all ${expanded ? 'bg-[var(--surface-2)] text-[var(--text-primary)] border-[var(--border-color)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]'}`}>
-            {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        {onDelete && (
+          <button onClick={() => onDelete(record.email_id)} className="relative rounded-lg p-2 bg-[var(--surface-1)] border border-transparent text-[var(--text-muted)] hover:text-danger hover:border-danger/30 hover:bg-danger-light transition-colors" title="Delete">
+            <Trash2 className="h-4 w-4" />
           </button>
-        </div>
+        )}
       </div>
-      <div className="relative mt-5 rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-4">
+
+      {/* ─── Score Breakdown ──────────────────────────────── */}
+      {record.score_breakdown && (
+        <div className="relative mb-5 rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-4">
+          <div className="mb-3 text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] flex items-center gap-1.5">
+            <Target className="h-3 w-3" /> Score Breakdown
+          </div>
+          <div className="flex gap-4 flex-wrap">
+            <MiniScoreBar label="Fit" value={fitVal} icon={BadgeCheck} />
+            <MiniScoreBar label="Urgency" value={urgencyVal} />
+            <MiniScoreBar label="Completeness" value={completenessVal} />
+          </div>
+        </div>
+      )}
+
+      {/* ─── Why It Matters (explanation) ────────────────── */}
+      <div className="relative mb-5 rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-4">
         <div className="mb-2 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]"><Info className="h-3 w-3" />Why it matters</div>
         <p className="text-[14px] text-[var(--text-primary)] leading-relaxed">{record.explanation}</p>
       </div>
-      {expanded && (
-        <div className="relative mt-5 space-y-5 animate-in slide-in-from-top-2 fade-in duration-200">
-          {record.summary && (
-            <div className="rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-5">
-              <div className="mb-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent)]"><FileText className="h-3.5 w-3.5" />Executive Summary</div>
-              <p className="text-[14px] text-[var(--text-secondary)] leading-relaxed">{record.summary}</p>
+
+      {/* ─── Why This Is an Opportunity (fit_reasons) ─────── */}
+      {record.fit_reasons?.length > 0 && (
+        <div className="relative mb-5 rounded-xl border border-[var(--accent)]/30 bg-gradient-to-br from-[var(--surface-1)] to-[var(--accent-glow)]/10 p-4">
+          <div className="mb-3 flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--accent)]">
+            <Sparkles className="h-3 w-3" /> Why This Is an Opportunity
+          </div>
+          <ul className="space-y-2">
+            {record.fit_reasons.map((reason, i) => (
+              <li key={i} className="flex items-start gap-2.5 text-[13px] text-[var(--text-primary)]">
+                <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--accent-glow)] text-[9px] font-bold text-[var(--accent)]">{i + 1}</div>
+                <span className="leading-relaxed">{reason}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* ─── Summary ──────────────────────────────────────── */}
+      {record.summary && (
+        <div className="relative mb-5 rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-4">
+          <div className="mb-2 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent)]"><FileText className="h-3.5 w-3.5" />Executive Summary</div>
+          <p className="text-[14px] text-[var(--text-secondary)] leading-relaxed">{record.summary}</p>
+        </div>
+      )}
+
+      {/* ─── Deadline + Location ──────────────────────────── */}
+      {(record.deadline_text || record.location) && (
+        <div className="relative mb-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {record.deadline_text && (
+            <div className="rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-3">
+              <div className="flex items-center gap-1 text-[9px] uppercase tracking-[0.2em] text-[var(--text-muted)] mb-1 font-bold"><Calendar className="h-3 w-3" /> Deadline</div>
+              <div className="text-[13px] font-medium text-[var(--text-primary)]">{record.deadline_text}</div>
             </div>
           )}
-          {record.detailed_actions?.length > 0 && (
-            <div className="rounded-xl bg-[var(--surface-1)] border border-[var(--border-color)] p-5 shadow-inner">
-              <div className="mb-4 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-success"><ListChecks className="h-3.5 w-3.5" />Action Plan</div>
-              <ul className="space-y-3">
-                {record.detailed_actions.map((a, i) => (
-                  <li key={i} className="flex items-start gap-3 text-[14px] text-[var(--text-primary)]">
-                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-2)] border border-[var(--border-color)] text-[10px] font-bold text-success">{i + 1}</div>
-                    <span className="leading-relaxed">{a}</span>
-                  </li>
-                ))}
-              </ul>
+          {record.location && (
+            <div className="rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-3">
+              <div className="flex items-center gap-1 text-[9px] uppercase tracking-[0.2em] text-[var(--text-muted)] mb-1 font-bold"><MapPin className="h-3 w-3" /> Location</div>
+              <div className="text-[13px] font-medium text-[var(--text-primary)]">{record.location}</div>
             </div>
           )}
-          {record.links?.length > 0 && (
-            <div className="rounded-xl bg-info-light border border-info/20 p-5">
-              <div className="mb-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-info"><ExternalLink className="h-3.5 w-3.5" />Important Links</div>
-              <ul className="space-y-2.5">
-                {record.links.slice(0, 6).map((l, i) => (
-                  <li key={i}>
-                    <a className="flex items-center gap-2 text-[14px] text-info hover:underline break-all transition-colors" href={l} target="_blank" rel="noreferrer">
-                      <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-70" />{l}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+        </div>
+      )}
+
+      {/* ─── Eligibility ──────────────────────────────────── */}
+      {record.eligibility?.length > 0 && (
+        <div className="relative mb-5 rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-4">
+          <div className="mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">Eligibility</div>
+          <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed">{record.eligibility.join(' • ')}</p>
+        </div>
+      )}
+
+      {/* ─── Benefits ─────────────────────────────────────── */}
+      {record.benefits?.length > 0 && (
+        <div className="relative mb-5 rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-4">
+          <div className="mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">Benefits</div>
+          <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed">{record.benefits.join(' • ')}</p>
+        </div>
+      )}
+
+      {/* ─── Action Plan ──────────────────────────────────── */}
+      {record.detailed_actions?.length > 0 && (
+        <div className="relative mb-5 rounded-xl bg-[var(--surface-1)] border border-[var(--border-color)] p-4 shadow-inner">
+          <div className="mb-3 flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-success"><ListChecks className="h-3.5 w-3.5" />Action Plan</div>
+          <ul className="space-y-2.5">
+            {record.detailed_actions.map((a, i) => (
+              <li key={i} className="flex items-start gap-3 text-[13px] text-[var(--text-primary)]">
+                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-2)] border border-[var(--border-color)] text-[10px] font-bold text-success">{i + 1}</div>
+                <span className="leading-relaxed">{a}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* ─── Links ────────────────────────────────────────── */}
+      {record.links?.length > 0 && (
+        <div className="relative rounded-xl bg-info-light border border-info/20 p-4">
+          <div className="mb-2.5 flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-info"><ExternalLink className="h-3 w-3" />Important Links</div>
+          <ul className="space-y-2">
+            {record.links.slice(0, 6).map((l, i) => (
+              <li key={i}>
+                <a className="flex items-center gap-2 text-[13px] text-info hover:underline break-all transition-colors" href={l} target="_blank" rel="noreferrer">
+                  <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-70" />{l}
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
   )
 }
+
 
 export default function EmailRecordPage({ data, onDeleteEmail, onDeleteAllEmails }) {
   const records = data?.email_records || []

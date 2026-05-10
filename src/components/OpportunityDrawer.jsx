@@ -9,6 +9,9 @@ import {
   Target,
   X,
   ExternalLink,
+  Sparkles,
+  MapPin,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -140,6 +143,29 @@ export default function OpportunityDrawer({ item, onClose }) {
         </div>
 
         <div className="space-y-5">
+          {/* Why This Is an Opportunity — AI Fit Reasons */}
+          {item.extracted.fit_reasons?.length > 0 && (
+            <div
+              className="rounded-2xl border border-[var(--accent)]/30 bg-gradient-to-br from-[var(--surface-1)] to-[var(--accent-glow)]/20 p-5 animate-fade-in delay-200"
+              style={{ animationFillMode: "backwards" }}
+            >
+              <div className="mb-3 flex items-center gap-2 text-[9px] uppercase tracking-[0.2em] text-[var(--accent)] font-bold">
+                <Sparkles className="h-3.5 w-3.5" />
+                Why This Is an Opportunity
+              </div>
+              <ul className="space-y-2.5">
+                {item.extracted.fit_reasons.map((reason, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-[var(--text-primary)]">
+                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--accent-glow)] text-[10px] font-bold text-[var(--accent)]">
+                      {i + 1}
+                    </div>
+                    <span className="leading-relaxed">{reason}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* Summary */}
           {item.extracted.summary && (
             <div
@@ -201,11 +227,21 @@ export default function OpportunityDrawer({ item, onClose }) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   {item.extracted.deadline_text && (
                     <div className="rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-3">
-                      <div className="text-[9px] uppercase tracking-[0.2em] text-[var(--text-muted)] mb-1 font-bold">
-                        Deadline
+                      <div className="flex items-center gap-1 text-[9px] uppercase tracking-[0.2em] text-[var(--text-muted)] mb-1 font-bold">
+                        <Calendar className="h-3 w-3" /> Deadline
                       </div>
                       <div className="text-[var(--text-primary)] font-medium break-words">
                         {item.extracted.deadline_text}
+                      </div>
+                    </div>
+                  )}
+                  {item.extracted.location && (
+                    <div className="rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-3">
+                      <div className="flex items-center gap-1 text-[9px] uppercase tracking-[0.2em] text-[var(--text-muted)] mb-1 font-bold">
+                        <MapPin className="h-3 w-3" /> Location
+                      </div>
+                      <div className="text-[var(--text-primary)] font-medium break-words">
+                        {item.extracted.location}
                       </div>
                     </div>
                   )}
