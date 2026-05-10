@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react'
-import { FileText, Info, ListChecks, Search, Zap, ExternalLink, Filter, Trash2, AlertTriangle, Mail, Clipboard, Clock, Sparkles, MapPin, Calendar, CalendarPlus, Target, BadgeCheck, ChevronDown, ChevronUp } from 'lucide-react'
+import { FileText, Info, ListChecks, Search, Zap, ExternalLink, Filter, Trash2, AlertTriangle, Mail, Clipboard, Clock, Sparkles, MapPin, Calendar, Target, BadgeCheck, ChevronDown, ChevronUp } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { getGoogleCalendarUrl } from '@/lib/calendar'
+import AddToCalendarButton from '@/components/AddToCalendarButton'
 
 function timeAgo(isoString) {
   if (!isoString) return null
@@ -197,23 +197,12 @@ function EmailRecordCard({ record, onDelete }) {
       {(record.deadline_text || record.location) && (
         <div className="relative mb-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {record.deadline_text && (
-            <div className="rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-3 relative group/deadline">
+            <div className="rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-3 relative">
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-1 text-[9px] uppercase tracking-[0.2em] text-[var(--text-muted)] font-bold">
                   <Calendar className="h-3 w-3" /> Deadline
                 </div>
-                {record.deadline_iso && (
-                  <a
-                    href={getGoogleCalendarUrl(record)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[9px] uppercase tracking-wider font-bold text-[var(--accent)] hover:text-[var(--accent-hover)] flex items-center gap-1 transition-colors"
-                    title="Add to Google Calendar"
-                  >
-                    <CalendarPlus className="h-3.5 w-3.5" />
-                    Add
-                  </a>
-                )}
+                <AddToCalendarButton opportunity={record} compact />
               </div>
               <div className="text-[13px] font-medium text-[var(--text-primary)]">{record.deadline_text}</div>
             </div>
