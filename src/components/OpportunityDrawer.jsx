@@ -12,9 +12,11 @@ import {
   Sparkles,
   MapPin,
   Calendar,
+  CalendarPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { getGoogleCalendarUrl } from "@/lib/calendar";
 
 function ScoreGauge({ label, value, icon: Icon }) {
   const circumference = 2 * Math.PI * 36;
@@ -226,9 +228,23 @@ export default function OpportunityDrawer({ item, onClose }) {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   {item.extracted.deadline_text && (
-                    <div className="rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-3">
-                      <div className="flex items-center gap-1 text-[9px] uppercase tracking-[0.2em] text-[var(--text-muted)] mb-1 font-bold">
-                        <Calendar className="h-3 w-3" /> Deadline
+                    <div className="rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)] p-3 group/deadline relative">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1 text-[9px] uppercase tracking-[0.2em] text-[var(--text-muted)] font-bold">
+                          <Calendar className="h-3 w-3" /> Deadline
+                        </div>
+                        {item.extracted.deadline_iso && (
+                          <a
+                            href={getGoogleCalendarUrl(item)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[9px] uppercase tracking-wider font-bold text-[var(--accent)] hover:text-[var(--accent-hover)] flex items-center gap-1 transition-colors"
+                            title="Add to Google Calendar"
+                          >
+                            <CalendarPlus className="h-3.5 w-3.5" />
+                            Add
+                          </a>
+                        )}
                       </div>
                       <div className="text-[var(--text-primary)] font-medium break-words">
                         {item.extracted.deadline_text}
