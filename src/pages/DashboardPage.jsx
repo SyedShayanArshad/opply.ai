@@ -33,14 +33,18 @@ function scoreBgHover(s) {
 }
 
 const metricConfigs = [
-  { key: 'total_emails', label: 'Emails Processed', icon: Inbox, iconColor: 'text-[var(--accent)]', trend: '+12% this week', trendUp: true },
-  { key: 'important', label: 'Opportunities Found', icon: Gem, iconColor: 'text-success', trend: '+5% this week', trendUp: true },
+  { key: 'total_emails', trendKey: 'processed_today', label: 'Emails Processed', icon: Inbox, iconColor: 'text-[var(--accent)]' },
+  { key: 'important', trendKey: 'important_today', label: 'Opportunities Found', icon: Gem, iconColor: 'text-success' },
   { key: 'urgent', label: 'Urgent Actions', icon: Zap, iconColor: 'text-danger', trend: 'Needs attention', trendUp: false, isCustom: true },
   { key: 'auto_sync', label: 'Sync Status', icon: RefreshCw, iconColor: 'text-info', isStatus: true },
 ]
 
-function MetricCard({ config, value, index }) {
+function MetricCard({ config, value, trendValue, index }) {
   const Icon = config.icon
+  const trendText = config.trendKey !== undefined 
+    ? `+${trendValue || 0} today`
+    : config.trend
+
   return (
     <div 
       className="relative overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--surface-1)] p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-fade-in"
@@ -50,9 +54,9 @@ function MetricCard({ config, value, index }) {
         <div className="rounded-xl bg-[var(--surface-2)] p-2 sm:p-2.5 border border-[var(--border-color)] shrink-0">
           <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${config.iconColor}`} />
         </div>
-        {config.trend && (
-          <div className={`text-[9px] sm:text-[10px] font-bold px-2 sm:px-2.5 py-1 rounded-full whitespace-nowrap overflow-hidden text-ellipsis ${config.trendUp ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}`}>
-            {config.trend}
+        {trendText && (
+          <div className={`text-[9px] sm:text-[10px] font-bold px-2 sm:px-2.5 py-1 rounded-full whitespace-nowrap overflow-hidden text-ellipsis ${config.trendUp !== false ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}`}>
+            {trendText}
           </div>
         )}
       </div>
@@ -337,7 +341,15 @@ export default function DashboardPage({ data, busy, emailsText, setEmailsText, o
           } else {
             val = data?.meta?.[c.key] ?? 0
           }
-          return <MetricCard key={c.key} config={c} value={val} index={i} />
+          return (
+            <MetricCard 
+              key={c.key} 
+              config={c} 
+              value={val} 
+              trendValue={c.trendKey ? data?.meta?.[c.trendKey] : null}
+              index={i} 
+            />
+          )
         })}
       </div>
 
